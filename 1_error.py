@@ -1,3 +1,5 @@
+# File "Theory of errors", page 12, task 5
+
 import math
 from tabulate import tabulate
 
