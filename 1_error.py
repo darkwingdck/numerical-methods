@@ -19,6 +19,8 @@ def main():
     e2 = 1e-6 / 5.4
     e3 = 1e-6 / 3
 
+    errors = [] # for errors analysis
+
     x = 0.01
     step = 0.005
     num = 0 # amount of arguments
@@ -72,9 +74,16 @@ def main():
             n += 1
             w0 = w1
             w1 = 0.5 * (w0 + fiFunc / w0)
+        
+        errors.append(abs(exactFunc(x) - w1 / psiFunc))
         value_list.append([num, x, w1 / psiFunc, exactFunc(x), abs(exactFunc(x) - w1 / psiFunc)]) # final table
         x += step
+        
+    # printing results
     print(tabulate(value_list, column_list, tablefmt="grid"))
+    print("Max error: ", max(errors))
+    print("Average absolute error: ", sum(errors) / len(errors))
+    print("Standard deviation: ", sum([x ** 2 for x in errors]) / len(errors))
 
 
 if __name__ == "__main__":
