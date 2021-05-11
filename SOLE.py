@@ -2,7 +2,7 @@
 
 import numpy as np
 from math import sqrt
-from colorama import Fore, Back, Style
+from colorama import Fore, Style
 
 def upperTriangularAns(mx): # getting answer from upper triangular matrix
 	res = 0
@@ -81,8 +81,12 @@ def squareRoot(a, b):
 	ans = upperTriangularAns(np.column_stack((s, y)))
 	return ans
 
-def iteration(mx):
-	pass
+def iterations(a, b, eps):
+	m = 2/(np.linalg.norm(a) + eps)
+	c = np.dot(m, b)
+	x0 = c
+	return x0
+	
 
 def main():
 	#mx = np.array([[7, 1, 1, 9], [1, 9, 1, 11], [1, 1, 11, 13]], dtype=float)
@@ -128,6 +132,27 @@ def main():
 	print(pySquare)
 	print("\nError:")
 	print(pySquare -  mySquare)
+	
+	print(Fore.BLUE + "-------------Fixed-point iteration------------")
+	print(Style.RESET_ALL)
+
+	a = np.array([[1, -1, -1], [0, 1, -1], [0, 0, 1]], dtype=float)
+	eps = 1e-3
+	a += np.array([[eps, -eps, -eps], [eps, eps, -eps], [eps, eps, eps]], dtype=float)
+	b = np.array([[-1], [-1], [1]], dtype=float)
+	mx = np.column_stack((a, b))
+
+	print("Matrix:")
+	print(mx)
+	print("\nMy solution:")
+	myIters = iterations(a, b, eps)
+	print(myIters)
+	print("\nPython solution:")
+	pyIters = np.linalg.solve(a, b).transpose()
+	print(pyIters)
+	print("\nError:")
+	print(pyIters -  myIters)
+	
 	
 
 if __name__ == "__main__":
