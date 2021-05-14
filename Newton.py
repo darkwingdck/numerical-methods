@@ -5,6 +5,7 @@ import numpy as np
 import math
 import copy
 from colorama import Fore, Style
+import matplotlib.pyplot as plt
 
 def f(x): # Scalar function
 	return (math.log10(x) - 7 / (2 * x + 6))
@@ -12,7 +13,24 @@ def f(x): # Scalar function
 def df(x): # Scalar function (derivative)
 	return 1 / (x * math.log(10)) + 14 / ((2 * x + 6) * (2 * x + 6))
 
-def newtonScalar(a,b): # Newton's method for scalar equation
+def newtonScalar(): # Newton's method for scalar equation
+	# Localization of roots
+	a = 1
+	b = 20
+	n = 40
+	h = (b - a) / n
+	xk = 0
+	xk1 = 0
+	for i in range(n):
+		xk = a + i * h
+		xk1 = a + h * (i + 1)
+		if f(xk) * f(xk1) < 0:
+			print("Root is located between", xk, "and", xk1)
+			break
+	a = xk
+	b = xk1
+
+	# Finding the actual root
 	x0 = (a + b) / 2
 	xn = f(x0)
 	xn1 = xn - f(xn) / df(xn)
@@ -28,8 +46,18 @@ def jacobian(x): # Jacobian for system
 	return np.array([[math.cos(x[0]), 2], [1, -math.sin(x[1] - 1)]],  dtype=float)
 
 def newtonNolinearSys(): # Solving SONE with Newton's method
-	x0 = np.array([1, 1], dtype=float)
-	x1 = x0 + np.array([1, 1], dtype=float)
+
+	# Graph
+	x = np.linspace(-0.2, 1.5, 50)
+	y1 = [(2 - math.sin(i)) / 2 for i in x]
+	y2 = [math.acos(0.7 - i) - 1 for i in x]
+	plt.grid()
+	plt.plot(x, y1, x, y2)
+	plt.show()
+
+
+	x0 = np.array([0.5, 1], dtype=float)
+	x1 = x0 + np.array([0.5, 1], dtype=float)
 	while abs(x0[0] - x1[0]) > 1e-4:
 		J = jacobian(x0)
 		func = -nolinF(x0)
@@ -43,7 +71,7 @@ def newtonNolinearSys(): # Solving SONE with Newton's method
 def main():
 	print(Fore.BLUE + "--------------------Newton's method--------------------", end='')
 	print(Style.RESET_ALL)
-	print(newtonScalar(4, 5), "\n")
+	print("Answer is", newtonScalar(), "\n")
 	print(Fore.BLUE + "----------Newton's method (nolinear equations)---------", end='')
 	print(Style.RESET_ALL)
 	print(newtonNolinearSys())
