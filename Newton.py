@@ -39,7 +39,7 @@ def newtonScalar(): # Newton's method for scalar equation
 		xn1 = xn - f(xn) / df(xn)
 	return xn1
 
-def nolinF(x): # System of nolimear equations
+def nolinF(x): # System of nolinear equations
 	return np.array([math.sin(x[0]) + 2 * x[1] - 2, x[0] + math.cos(x[1] - 1) - 0.7], dtype=float)
 
 def jacobian(x): # Jacobian for system
