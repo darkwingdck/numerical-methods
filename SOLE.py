@@ -191,7 +191,7 @@ def main():
 		pySquare = np.linalg.solve(a, b).transpose()
 
 		value_list.append([i + 1, [round(j, 4) for j in mySquare], [round(j, 4) for j in pySquare[0]], *[abs(pySquare[0] - mySquare)]])
-	print(tabulate(value_list, column_list, tablefmt="grid"))
+	print(tabulate(value_list, column_list, tablefmt="grid"), "\n")
 	
 
 	column_list = ["id", "approximate value", "exact value", "error", "condition number", "number of iterations"] # for final table
@@ -208,7 +208,7 @@ def main():
 	print("Error: ", abs(pyIters - myIters), "\n")
 
 	# ill-conditioned matrices
-	print(Fore.CYAN + "---Ill-conditioned matrces---")
+	print(Fore.CYAN + "---Ill-conditioned matrices---")
 	print(Style.RESET_ALL)
 	for i in range(len(MATRICES)):
 		mx = MATRICES[i]
@@ -221,7 +221,7 @@ def main():
 		numberOfIters = iterations(a, b)[1] # number of iterations for Ill-conditioned matrices
 
 		value_list.append([i + 1, [round(j, 4) for j in myIters], [round(j, 4) for j in pyIters], [round(j, 10) for j in abs(pyIters -  myIters)], np.linalg.cond(a), numberOfIters])
-	print(tabulate(value_list, column_list, tablefmt="grid"))
+	print(tabulate(value_list, column_list, tablefmt="grid"), "\n")
 	
 	
 
