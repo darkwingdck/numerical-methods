@@ -2,9 +2,50 @@
 
 import numpy as np
 from math import sqrt
-from colorama import Fore, Style
+from colorama import Fore, Style, Back
 from tabulate import tabulate
 
+def norm1(mx):
+	n = mx.shape[0]
+	s = 0
+	s1 = 0
+	for i in range(n):
+		if s > s1:
+			s1 = s
+		s = 0
+		for j in range(n):
+			s += abs(mx[i, j])
+	return max(s1, s)
+
+def norm2(mx):
+	n = mx.shape[0]
+	s = 0
+	s1 = 0
+	for i in range(n):
+		if s > s1:
+			s1 = s
+		s = 0
+		for j in range(n):
+			s += abs(mx[j, i])
+	return max(s1, s)
+
+def norm3(mx):
+	n = mx.shape[0]
+	s = 0
+	for i in range(n):
+		for j in range(n):
+			s += mx[i, j] ** 2
+	return sqrt(s)
+
+
+def v(mx, k): # getting condition number
+	n = mx.shape[0]
+	if k == 1:
+		return norm1(mx) * norm1(np.linalg.inv(mx))
+	elif k == 2:
+		return norm2(mx) * norm2(np.linalg.inv(mx))
+	else:
+		return norm3(mx) * norm3(np.linalg.inv(mx))
 
 
 def upperTriangularAns(mx): # getting answer from upper triangular matrix
@@ -91,22 +132,24 @@ def squareRoot(a, b):
 
 
 def iterations(a, b):
-	m = 1/(np.linalg.norm(a))
+	m = 1/(np.linalg.norm(a) + 10)
 	c = np.dot(m, b)
 	B = np.eye(len(a)) - np.dot(m, a)
 	x0 = c[:]
 	x1 = x0[:]
 	x2 = np.dot(B, x0) + c
+	numberOfIters = 0 # number of iterations
 	while np.linalg.norm(x2 - x1) > np.linalg.norm(x2 - x0) * np.linalg.norm(B) / (1 - np.linalg.norm(B)):
 		x1 = np.dot(B, x0) + c
 		x0 = x1
 		x2 = np.dot(B, x0) + c
-	return x1.transpose()
+		numberOfIters += 1
+	return x1.transpose(), numberOfIters
 
 
 
-def matrices():
-	eps = [1e-4, 1e-5, 1e-6]
+def matrices(): # ill-conditioned matrices
+	eps = [1e-4, 1e-6]
 	MATRICES = []
 	for i in eps:
 		a = np.array([[1, -1, -1], [0, 1, -1], [0, 0, 1]], dtype=float)
@@ -129,11 +172,25 @@ def matrices():
 
 def main():
 
+	wellCondA = np.array([[7, 1, 1], [1, 9, 1], [1, 1, 11]], dtype=float)
+	wellCondB = np.array([9, 11, 13], dtype=float)
+	wellCondM = np.column_stack((wellCondA, wellCondB))
 
-	column_list = ["id", "N", "eps", "approximate value", "exact value", "error"] # for final table
+	column_list = ["id", "approximate value", "exact value", "error"] # for final table
 	value_list = [] # for final table
 	MATRICES = matrices()
-	print(Fore.BLUE + "--------------------Gauss--------------------")
+	print(Fore.MAGENTA + "\n--------------------Gauss--------------------")
+	print(Style.RESET_ALL)
+	# well conditioned matrix
+	print(Fore.CYAN + "---Well conditioned matrix---")
+	print(Style.RESET_ALL)
+	myGauss = triangularMatrix(wellCondM)
+	pyGauss = np.linalg.solve(wellCondA, wellCondB).transpose()
+	print("My solution: ", myGauss)
+	print("Python solution: ", pyGauss)
+	print("Error: ", abs(pyGauss - myGauss), "\n")
+	# ill-conditioned matrix
+	print(Fore.CYAN + "---Ill-conditioned matrces---")
 	print(Style.RESET_ALL)
 	for i in range(len(MATRICES)):
 		mx = MATRICES[i]
@@ -142,22 +199,28 @@ def main():
 		b = mx[:, -1]
 		myGauss = triangularMatrix(mx)
 		pyGauss = np.linalg.solve(a, b).transpose()
-		if i in [0, 3]: 
-			eps = 1e-4
-		elif i in [1, 4]:
-			eps = 1e-5
-		else:
-			eps = 1e-6
-		value_list.append([i + 1, N, eps, [round(j, 4) for j in myGauss], [round(j, 4) for j in pyGauss], [j for j in pyGauss - myGauss]])
-	print(tabulate(value_list, column_list, tablefmt="grid"))
+		value_list.append([i + 1, [round(j, 4) for j in myGauss], [round(j, 4) for j in pyGauss], [j for j in abs(pyGauss - myGauss)]])
+	print(tabulate(value_list, column_list, tablefmt="grid"), "\n")
 	
 
 	column_list = ["id", "approximate value", "exact value", "error"] # for final table
 	value_list = [] # for final table
-	print(Fore.BLUE + "--------------------Square--------------------")
+	print(Fore.MAGENTA + "--------------------Square--------------------")
+	print(Style.RESET_ALL)
+	# well conditioned matrix
+	print(Fore.CYAN + "---Well conditioned matrix---")
+	print(Style.RESET_ALL)
+	mySquare = squareRoot(wellCondA, wellCondB)
+	pySquare = np.linalg.solve(wellCondA, wellCondB).transpose()
+	print("My solution: ", mySquare)
+	print("Python solution: ", pySquare)
+	print("Error: ", abs(mySquare - pySquare), "\n")
+
+	# random positive definite matrces
+	print(Fore.CYAN + "---Random positive definite matrices---")
 	print(Style.RESET_ALL)
 	for i in range(5):
-		# creating random positive definite matrix (2 matrix for each N)	
+		# creating random positive definite matrix	
 		N = 3
 		a = np.random.uniform(low=3, high=7, size=(N, N))
 		a = np.dot(a, a.transpose())
@@ -168,13 +231,25 @@ def main():
 		mySquare = squareRoot(a, b)
 		pySquare = np.linalg.solve(a, b).transpose()
 
-		value_list.append([i + 1, [round(j, 4) for j in mySquare], [round(j, 4) for j in pySquare[0]], *[pySquare[0] - mySquare]])
+		value_list.append([i + 1, [round(j, 4) for j in mySquare], [round(j, 4) for j in pySquare[0]], *[abs(pySquare[0] - mySquare)]])
 	print(tabulate(value_list, column_list, tablefmt="grid"))
 	
 
-	column_list = ["id", "N", "approximate value", "exact value", "error"] # for final table
+	column_list = ["id", "approximate value", "exact value", "error", "v1", "v2", "v3", "number of iterations"] # for final table
 	value_list = [] # for final table
-	print(Fore.BLUE + "-------------Fixed-point iteration------------")
+	print(Fore.MAGENTA + "-------------Fixed-point iteration------------")
+	print(Style.RESET_ALL)
+	# well conditioned matrix
+	print(Fore.CYAN + "---Well conditioned matrix---")
+	print(Style.RESET_ALL)
+	myIters = iterations(wellCondA, wellCondB)[0] # function returns answer and number of iterations, so [0]
+	pyIters = np.linalg.solve(wellCondA, wellCondB).transpose()
+	print("My solution: ", myIters)
+	print("Python solution: ", pyIters)
+	print("Error: ", abs(pyIters - myIters), "\n")
+
+	# ill-conditioned matrix
+	print(Fore.CYAN + "---Ill-conditioned matrces---")
 	print(Style.RESET_ALL)
 	for i in range(len(MATRICES)):
 		mx = MATRICES[i]
@@ -182,10 +257,11 @@ def main():
 		a = mx[:, :N]
 		b = mx[:, -1]
 
-		myIters = iterations(a, b)
+		myIters = iterations(a, b)[0]
 		pyIters = np.linalg.solve(a, b).transpose()
+		numberOfIters = iterations(a, b)[1] # number of iterations for Ill-conditioned matrces
 
-		value_list.append([i + 1, N, [round(j, 4) for j in myIters], [round(j, 4) for j in pyIters], [round(j, 10) for j in pyIters -  myIters]])
+		value_list.append([i + 1, [round(j, 4) for j in myIters], [round(j, 4) for j in pyIters], [round(j, 10) for j in abs(pyIters -  myIters)], v(a, 1), v(a, 2), v(a, 3), numberOfIters])
 	print(tabulate(value_list, column_list, tablefmt="grid"))
 	
 	
