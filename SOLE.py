@@ -5,47 +5,6 @@ from math import sqrt
 from colorama import Fore, Style, Back
 from tabulate import tabulate
 
-def norm1(mx):
-	n = mx.shape[0]
-	s = 0
-	s1 = 0
-	for i in range(n):
-		if s > s1:
-			s1 = s
-		s = 0
-		for j in range(n):
-			s += abs(mx[i, j])
-	return max(s1, s)
-
-def norm2(mx):
-	n = mx.shape[0]
-	s = 0
-	s1 = 0
-	for i in range(n):
-		if s > s1:
-			s1 = s
-		s = 0
-		for j in range(n):
-			s += abs(mx[j, i])
-	return max(s1, s)
-
-def norm3(mx):
-	n = mx.shape[0]
-	s = 0
-	for i in range(n):
-		for j in range(n):
-			s += mx[i, j] ** 2
-	return sqrt(s)
-
-
-def v(mx, k): # getting condition number
-	n = mx.shape[0]
-	if k == 1:
-		return norm1(mx) * norm1(np.linalg.inv(mx))
-	elif k == 2:
-		return norm2(mx) * norm2(np.linalg.inv(mx))
-	else:
-		return norm3(mx) * norm3(np.linalg.inv(mx))
 
 
 def upperTriangularAns(mx): # getting answer from upper triangular matrix
@@ -189,8 +148,8 @@ def main():
 	print("My solution: ", myGauss)
 	print("Python solution: ", pyGauss)
 	print("Error: ", abs(pyGauss - myGauss), "\n")
-	# ill-conditioned matrix
-	print(Fore.CYAN + "---Ill-conditioned matrces---")
+	# ill-conditioned matrices
+	print(Fore.CYAN + "---Ill-conditioned matrices---")
 	print(Style.RESET_ALL)
 	for i in range(len(MATRICES)):
 		mx = MATRICES[i]
@@ -235,7 +194,7 @@ def main():
 	print(tabulate(value_list, column_list, tablefmt="grid"))
 	
 
-	column_list = ["id", "approximate value", "exact value", "error", "v1", "v2", "v3", "number of iterations"] # for final table
+	column_list = ["id", "approximate value", "exact value", "error", "condition number", "number of iterations"] # for final table
 	value_list = [] # for final table
 	print(Fore.MAGENTA + "-------------Fixed-point iteration------------")
 	print(Style.RESET_ALL)
@@ -248,7 +207,7 @@ def main():
 	print("Python solution: ", pyIters)
 	print("Error: ", abs(pyIters - myIters), "\n")
 
-	# ill-conditioned matrix
+	# ill-conditioned matrices
 	print(Fore.CYAN + "---Ill-conditioned matrces---")
 	print(Style.RESET_ALL)
 	for i in range(len(MATRICES)):
@@ -259,9 +218,9 @@ def main():
 
 		myIters = iterations(a, b)[0]
 		pyIters = np.linalg.solve(a, b).transpose()
-		numberOfIters = iterations(a, b)[1] # number of iterations for Ill-conditioned matrces
+		numberOfIters = iterations(a, b)[1] # number of iterations for Ill-conditioned matrices
 
-		value_list.append([i + 1, [round(j, 4) for j in myIters], [round(j, 4) for j in pyIters], [round(j, 10) for j in abs(pyIters -  myIters)], v(a, 1), v(a, 2), v(a, 3), numberOfIters])
+		value_list.append([i + 1, [round(j, 4) for j in myIters], [round(j, 4) for j in pyIters], [round(j, 10) for j in abs(pyIters -  myIters)], np.linalg.cond(a), numberOfIters])
 	print(tabulate(value_list, column_list, tablefmt="grid"))
 	
 	
