@@ -1,6 +1,6 @@
 # File "Newton's method, tasks 5"
 
-import SOLE # To solve a system of linear equations
+import sole # To solve a system of linear equations
 import numpy as np
 import math
 import copy
@@ -62,7 +62,7 @@ def newtonNolinearSys(): # Solving SONE with Newton's method
 		J = jacobian(x0)
 		func = -nolinF(x0)
 		mx = np.array([[J[0][0], J[0][1], func[0]], [J[1][0], J[1][1], func[1]]], dtype=float)
-		deltaX0 = SOLE.triangularMatrix(mx)
+		deltaX0 = sole.triangularMatrix(mx)
 		x1 = copy.deepcopy(x0)
 		x0 += deltaX0
 	return x0
